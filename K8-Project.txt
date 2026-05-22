@@ -1,0 +1,642 @@
+K8-Project
+
+
+Here’s the recommended architecture:
+
+5 VM Kubernetes Architecture
+                 USER
+                   |
+            Ingress Controller
+                   |
+        -------------------------
+        |                       |
+   Worker Node 1          Worker Node 2
+        |                       |
+     Frontend Pods         Backend Pods
+        |                       |
+        --------Service----------
+                   |
+             Worker Node 3
+                   |
+               MySQL Pod
+
+        Master Node 1
+        (Control Plane)
+
+        Monitoring Node
+   (Prometheus + Grafana)
+VM Distribution
+VM	Role	Purpose
+VM1	Master Node	Kubernetes Control Plane
+VM2	Worker Node 1	Frontend Pods
+VM3	Worker Node 2	Backend Pods
+VM4	Worker Node 3	Database / Extra workloads
+VM5	Monitoring Node	Prometheus + Grafana
+Why This Architecture is Powerful
+
+This teaches real industry concepts:
+
+Distributed systems
+Container orchestration
+Multi-node scheduling
+Cluster networking
+Service discovery
+Scaling
+Monitoring
+High availability concepts
+What Will Happen Internally
+
+Suppose:
+
+Frontend replicas = 3
+Backend replicas = 4
+
+Kubernetes scheduler automatically spreads pods across worker nodes.
+
+Example:
+
+Worker1:
+- frontend-pod-1
+- frontend-pod-2
+
+Worker2:
+- backend-pod-1
+- backend-pod-2
+
+Worker3:
+- backend-pod-3
+- mysql-pod
+
+If one worker VM crashes:
+
+Kubernetes reschedules pods
+Application still runs
+Self-healing occurs
+
+This becomes your main demo feature.
+
+Full Project Components
+Infrastructure Layer
+Ubuntu VMs
+Static IPs
+SSH
+Hostnames
+Kubernetes Layer
+kubeadm
+kubelet
+kubectl
+containerd
+Calico CNI
+Application Layer
+Frontend
+HTML/CSS/JS or React
+Backend
+Node.js Express API
+Database
+MySQL
+Kubernetes Objects
+
+You’ll create:
+
+Object	Purpose
+Pod	Container instance
+Deployment	Replica management
+Service	Networking
+ConfigMap	Configurations
+Secret	Passwords
+Ingress	Routing
+HPA	Auto scaling
+Real DevOps Features We Can Add
+1. Auto Scaling
+kubectl autoscale deployment backend --cpu-percent=50 --min=2 --max=10
+2. Rolling Updates
+kubectl set image deployment/frontend frontend=zaid/frontend:v2
+
+Zero downtime deployment.
+
+3. Monitoring
+
+Using:
+
+Prometheus
+Grafana
+
+Dashboards show:
+
+CPU usage
+RAM usage
+Node health
+Pod health
+4. Ingress Controller
+
+Instead of:
+
+192.168.1.20:30001
+
+You access:
+
+cloudshop.local
+
+Industry-style routing.
+
+Suggested Folder Structure
+Kubernetes-CloudShop/
+│
+├── frontend/
+├── backend/
+├── database/
+├── kubernetes/
+│   ├── frontend/
+│   ├── backend/
+│   ├── mysql/
+│   ├── ingress/
+│   ├── monitoring/
+│
+├── screenshots/
+├── architecture/
+├── README.md
+End Result
+
+At the end, your project will demonstrate:
+
+✅ Multi-node Kubernetes cluster
+✅ Application deployment
+✅ Scaling
+✅ Load balancing
+✅ Self healing
+✅ Monitoring
+✅ Ingress routing
+✅ YAML management
+✅ DevOps concepts
+✅ Cloud-native architecture
+
+What We Need First
+
+Before starting, decide:
+
+Platform
+VMware
+VirtualBox
+Cloud VMs
+OS
+
+Recommended:
+
+Ubuntu Server 22.04
+Runtime
+
+Recommended:
+
+containerd
+Networking
+
+Recommended:
+
+Calico
+Recommended VM Names
+VM	Hostname
+VM1	k8s-master
+VM2	k8s-worker1
+VM3	k8s-worker2
+VM4	k8s-worker3
+VM5	k8s-monitor
+Hardware Recommendation
+
+For smooth experience:
+
+Resource	Per VM
+RAM	2GB minimum
+CPU	2 cores
+Disk	20GB
+
+Total system:
+
+16GB RAM preferred
+Next Step
+
+Now we start with:
+
+STEP 1 — Create All 5 Ubuntu VMs
+
+Then we’ll:
+
+Set static IPs
+Configure hostnames
+Install containerd
+Install Kubernetes
+Initialize cluster
+Join workers
+Deploy application
+
+Once your VMs are ready, send:
+
+VM platform
+IP addresses
+Screenshot of all VMs running
+
+Then we continue.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+What We Have Done Till Now
+PHASE 1 — Infrastructure Setup
+1. Created 5 Virtual Machines
+
+You created:
+
+VM	Purpose
+k8s-master	Kubernetes Control Plane
+k8s-worker1	Worker Node
+k8s-worker2	Worker Node
+k8s-worker3	Worker Node
+k8s-worker4	Monitoring / Extra Workloads
+2. Configured Networking
+
+You configured:
+
+✅ Private IP communication
+✅ SSH/Public access
+✅ Internal node communication
+
+Example:
+
+192.168.0.x
+
+This private network will be used by Kubernetes cluster internally.
+
+3. Configured Hostnames
+
+We assigned proper Kubernetes-friendly names:
+
+k8s-master
+k8s-worker1
+k8s-worker2
+k8s-worker3
+k8s-worker4
+
+This helps:
+
+cluster communication
+hostname resolution
+easier management
+4. Updated /etc/hosts
+
+On all nodes, we added:
+
+192.168.0.2 k8s-master
+192.168.0.3 k8s-worker1
+192.168.0.4 k8s-worker2
+192.168.0.5 k8s-worker3
+192.168.0.6 k8s-worker4
+
+Purpose:
+
+✅ nodes can communicate using hostname
+✅ easier cluster management
+✅ internal DNS-style resolution
+
+5. Disabled Swap
+
+We executed:
+
+sudo swapoff -a
+
+and permanently disabled swap.
+
+Why?
+
+Kubernetes scheduler requires accurate memory management.
+
+Swap can break:
+
+pod scheduling
+performance
+kubelet behavior
+
+So Kubernetes requires:
+
+Swap = OFF
+6. Enabled Required Kernel Modules
+
+We enabled:
+
+overlay
+br_netfilter
+
+Purpose:
+
+Module	Purpose
+overlay	Container filesystem support
+br_netfilter	Kubernetes networking
+7. Configured System Networking
+
+We configured:
+
+net.ipv4.ip_forward = 1
+
+and bridge settings.
+
+Purpose:
+
+✅ pod networking
+✅ container communication
+✅ service routing
+
+8. Installed containerd
+
+You installed:
+
+containerd
+
+This is the container runtime.
+
+What Is containerd?
+
+Container runtime is responsible for:
+
+✅ running containers
+✅ pulling images
+✅ managing container lifecycle
+
+Kubernetes DOES NOT directly run containers.
+
+Instead:
+
+Kubernetes
+    ↓
+containerd
+    ↓
+Containers
+9. Generated containerd Config
+
+We created:
+
+/etc/containerd/config.toml
+
+because default config wasn't present automatically.
+
+10. Configured SystemdCgroup
+
+We changed:
+
+SystemdCgroup = true
+Why Important?
+
+Kubernetes + containerd should use same cgroup driver.
+
+This improves:
+
+✅ stability
+✅ resource management
+✅ kubelet compatibility
+
+11. Restarted containerd Service
+
+We restarted:
+
+sudo systemctl restart containerd
+
+and verified:
+
+active (running)
+CURRENT STATUS OF PROJECT
+Infrastructure Layer ✅
+5 VMs
+    ↓
+Networking configured
+    ↓
+Hostnames configured
+    ↓
+Swap disabled
+    ↓
+Kernel modules enabled
+    ↓
+containerd installed
+
+Now machines are READY for Kubernetes installation.
+
+
+
+
+
+
+
+
+# Phase 2
+PHASE 2 — Kubernetes Cluster Setup
+
+This is the core infrastructure phase of the entire project.
+
+What We Did in Phase 2
+1. Installed Kubernetes Components
+
+We installed:
+
+Component	Purpose
+kubeadm	Cluster initialization
+kubelet	Node agent
+kubectl	Kubernetes CLI
+What These Components Do
+kubeadm
+
+Used to:
+
+✅ initialize cluster
+✅ join worker nodes
+
+Example:
+
+kubeadm init
+kubelet
+
+Runs on every node.
+
+Responsible for:
+
+✅ communicating with master
+✅ managing pods
+✅ running containers through containerd
+
+kubectl
+
+Command line tool for Kubernetes.
+
+Used for:
+
+kubectl get nodes
+kubectl get pods
+kubectl apply
+2. Initialized Kubernetes Master Node
+
+We executed:
+
+sudo kubeadm init --pod-network-cidr=192.168.0.0/16
+What Happened Internally?
+
+This command created:
+
+✅ Kubernetes API Server
+✅ Scheduler
+✅ Controller Manager
+✅ etcd database
+✅ Cluster certificates
+✅ Authentication system
+✅ Control Plane
+
+What Is Control Plane?
+
+Control plane is the brain of Kubernetes.
+
+It manages:
+
+scheduling
+cluster decisions
+deployments
+scaling
+node management
+3. Configured kubectl Access
+
+We configured:
+
+mkdir -p $HOME/.kube
+sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+
+Purpose:
+
+✅ allows kubectl to communicate with cluster
+✅ authenticates admin user
+
+4. Installed Calico CNI
+
+We installed:
+
+Calico
+
+using:
+
+kubectl apply -f calico.yaml
+What Is Calico?
+
+Calico is a:
+
+CNI (Container Network Interface)
+
+It provides:
+
+✅ pod networking
+✅ inter-node communication
+✅ pod-to-pod connectivity
+✅ network routing
+
+Why Is CNI Important?
+
+Without CNI:
+
+❌ pods cannot communicate
+❌ cluster networking fails
+
+5. Generated Worker Join Token
+
+We executed:
+
+kubeadm token create --print-join-command
+
+This generated secure join command.
+
+6. Joined Worker Nodes
+
+We connected:
+
+✅ k8s-worker1
+✅ k8s-worker2
+✅ k8s-worker3
+✅ k8s-worker4
+
+to master node.
+
+What Happened Internally?
+
+When workers joined:
+
+✅ kubelet registered node
+✅ certificates exchanged
+✅ node authenticated
+✅ networking configured
+✅ cluster membership established
+
+7. Verified Cluster
+
+We checked:
+
+kubectl get nodes
+
+and verified:
+
+✅ master node
+✅ worker nodes
+✅ cluster communication
+
+CURRENT ARCHITECTURE
+                Kubernetes Cluster
+                        |
+        ---------------------------------
+        |        |        |        |
+    Worker1  Worker2  Worker3  Worker4
+                        |
+                   Pods will run here
+                        |
+                  Master Node
+               (Control Plane)
+Concepts Learned in Phase 2
+
+You now understand:
+
+✅ Kubernetes architecture
+✅ Control Plane
+✅ Worker Nodes
+✅ kubeadm
+✅ kubelet
+✅ kubectl
+✅ CNI networking
+✅ Cluster initialization
+✅ Node registration
+✅ Distributed systems basics
+
+CURRENT STATUS
+Kubernetes Cluster Status
+Component	Status
+Master Node	✅ Running
+Worker Nodes	✅ Joined
+containerd	✅ Running
+Calico	✅ Installed
+Cluster Networking	✅ Working
+BIG ACHIEVEMENT
+
+At this point you already built:
+
+A Real Multi-Node Kubernetes Cluster 🔥
+
+This itself is a strong infrastructure accomplishment.
+
+REPORT CONTENT FOR PHASE 2
+Kubernetes Cluster Setup
+
+You can write:
+
+Installed Kubernetes packages including kubeadm, kubelet, and kubectl
+Initialized Kubernetes control plane using kubeadm
+Configured cluster networking using Calico CNI
+Joined multiple worker nodes to the cluster
+Verified node communication and cluster health
+Established a multi-node container orchestration environment
