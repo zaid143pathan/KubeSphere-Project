@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>KubeSphere Dashboard</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <header>
+        <h1>KubeSphere Dashboard</h1>
+
+        <p>Cloud-Native Kubernetes Major Project</p>
+    </header>
+
+    <section class="container">
+
+        <div class="card">
+            <h2>Frontend Service</h2>
+
+            <p>Status: Running</p>
+        </div>
+
+        <div class="card">
+            <h2>Backend API</h2>
+
+            <p>Status: Connected</p>
+        </div>
+
+        <div class="card">
+            <h2>Database</h2>
+
+            <p>Status: Active</p>
+        </div>
+
+    </section>
+
+    <section class="user-section">
+
+        <h1>KubeSphere User Dashboard</h1>
+
+        <input
+            type="text"
+            id="username"
+            placeholder="Enter Username"
+        >
+
+        <button onclick="addUser()">
+            Add User
+        </button>
+
+        <h2>Users:</h2>
+
+        <ul id="users"></ul>
+
+    </section>
+
+    <script src="script.js"></script>
+
+</body>
+
+</html>
